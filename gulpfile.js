@@ -3,13 +3,13 @@ var rev = require('gulp-rev');
 var revReplace = require('gulp-rev-replace'); //Rewrite occurences of filenames which have been renamed by gulp-rev 
 var replace = require('gulp-replace') //string replace
 
-var md5Value = function () {
-            return Array.apply(0, Array(15)).map(function() {
-                return (function(charset){
-                    return charset.charAt(Math.floor(Math.random() * charset.length));
-                }('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'));
-            }).join('');
-        }
+var md5Value = function() {
+    return Array.apply(0, Array(15)).map(function() {
+        return (function(charset) {
+            return charset.charAt(Math.floor(Math.random() * charset.length));
+        }('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'));
+    }).join('');
+}
 
 var config = {
     source_path: "./manage_90/",
@@ -61,7 +61,9 @@ gulp.task("adv", function() {
             '!' + config.source_advertiser_path + "*.html",
             //'!'+ config.source_path + "/Advertiser/sign-up.html"
         ])
-        .pipe(rev({hash:config.hash_value}))
+        .pipe(rev({
+            hash: config.hash_value
+        }))
         .pipe(gulp.dest(config.dest_path + "/Advertiser"))
         .pipe(rev.manifest())
         .pipe(gulp.dest(config.dest_path + "/Advertiser"))
@@ -71,11 +73,14 @@ gulp.task("adv", function() {
             gulp.src([config.source_advertiser_path + "*.html"])
                 .pipe(revReplace({
                     manifest: manifest,
-                    prefix: config.cdn_server
+                    prefix: config.cdn_server + 'Advertiser/'
                 }))
+                .pipe(replace(/href=('|")\.\.\/(.+).(css)/g, 'href="' + config.cdn_server + "$2" + "-" + config.hash_value + ".css"))
+                .pipe(replace(/src=('|")\.\.\/(.+).(js|png|jpg|gif)/g, 'src="' + config.cdn_server + "$2" + "-" + config.hash_value + ".$3"))
                 .pipe(gulp.dest(config.dest_path + "/Advertiser"))
         })
 })
+
 
 gulp.task('default', ["copy_other_files", "loginHtml", "mainjs", "copy_upload", "copy_htaccess", "adv"], function() {
     return gulp.src([
@@ -84,24 +89,29 @@ gulp.task('default', ["copy_other_files", "loginHtml", "mainjs", "copy_upload", 
             '!' + config.source_advertiser_path + "*.html",
             //'!'+ config.source_path + "/Advertiser/sign-up.html"
         ])
-        .pipe(rev({hash:config.hash_value}))
+        .pipe(rev({
+            hash: config.hash_value
+        }))
         .pipe(gulp.dest(config.dest_path))
         .pipe(rev.manifest())
         .pipe(gulp.dest(config.dest_path))
         .on("end", function() {
 
             gulp.src([config.temp_path + "/static/script/*.*"])
-                .pipe(rev({hash:config.hash_value}))
+                .pipe(rev({
+                    hash: config.hash_value
+                }))
                 .pipe(gulp.dest(config.dest_path + "/static/script/"))
 
             gulp.src(config.dest_path + "**/*.css")
                 .pipe(replace(/.(png|jpg|gif)/g, "-" + config.hash_value + ".$1"))
                 .pipe(gulp.dest(config.dest_path))
 
-            gulp.src(config.dest_path + "**/*.html")
-                .pipe(replace(/static\/(.+).(png|jpg|gif)/g, config.cdn_server + "static/$1"+"-" + config.hash_value + ".$2"))
+            gulp.src([config.dest_path + "**/*.html",
+                    '!' + config.dest_path + "Advertiser/*.html"
+                ])
+                .pipe(replace(/static\/(.+).(png|jpg|gif)/g, config.cdn_server + "static/$1" + "-" + config.hash_value + ".$2"))
                 .pipe(gulp.dest(config.dest_path))
-
 
             var manifest = gulp.src(config.dest_path + "/rev-manifest.json")
             gulp.src([config.source_path + "/*.html",
@@ -112,6 +122,7 @@ gulp.task('default', ["copy_other_files", "loginHtml", "mainjs", "copy_upload", 
                     manifest: manifest,
                     prefix: config.cdn_server
                 }))
+                .pipe(replace(/widget-script=('|")(.+).(js)/g, 'widget-script="$2-' + config.hash_value + '.$3'))
                 .pipe(gulp.dest(config.dest_path))
                 .on("end", function() {
                     gulp.src([config.dest_path + "/static/**/*.html"])
@@ -120,6 +131,8 @@ gulp.task('default', ["copy_other_files", "loginHtml", "mainjs", "copy_upload", 
                             prefix: config.cdn_server
                         }))
                         .pipe(gulp.dest(config.dest_path + "/static"))
+
+
 
                 })
 
