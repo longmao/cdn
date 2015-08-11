@@ -1,5 +1,5 @@
 var gulp = require("gulp");
-var rev = require('gulp-rev');
+var rev = require('gulp-rev-custom-hash');
 var revReplace = require('gulp-rev-replace'); //Rewrite occurences of filenames which have been renamed by gulp-rev 
 var replace = require('gulp-replace') //string replace
 
@@ -96,6 +96,7 @@ gulp.task('default', ["copy_other_files", "loginHtml", "mainjs", "copy_upload", 
         .pipe(rev.manifest())
         .pipe(gulp.dest(config.dest_path))
         .on("end", function() {
+            var manifest = gulp.src(config.dest_path + "/rev-manifest.json")
 
             gulp.src([config.temp_path + "/static/script/*.*"])
                 .pipe(rev({
@@ -113,7 +114,6 @@ gulp.task('default', ["copy_other_files", "loginHtml", "mainjs", "copy_upload", 
                 .pipe(replace(/static\/(.+).(png|jpg|gif)/g, config.cdn_server + "static/$1" + "-" + config.hash_value + ".$2"))
                 .pipe(gulp.dest(config.dest_path))
 
-            var manifest = gulp.src(config.dest_path + "/rev-manifest.json")
             gulp.src([config.source_path + "/*.html",
                     '!' + config.source_path + "/login.html",
                     config.dest_path + "/login.html"
