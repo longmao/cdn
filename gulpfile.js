@@ -3,7 +3,6 @@ var rev = require('gulp-rev-custom-hash');
 var revReplace = require('gulp-rev-replace'); //Rewrite occurences of filenames which have been renamed by gulp-rev 
 var replace = require('gulp-replace') //string replace
 
-console.log(process.env.output)
 var md5Value = function() {
     return Array.apply(0, Array(15)).map(function() {
         return (function(charset) {
@@ -13,11 +12,11 @@ var md5Value = function() {
 }
 
 var config = {
-    source_path: process.env.output || "./manage_90/",
-    source_advertiser_path: process.env.output + "/Advertiser/"|| "./manage_90/Advertiser/",
+    source_path: "./",
+    source_advertiser_path:  "./Advertiser/",
     cdn_server: "http://cdn.yeahmobi.com/",
-    dest_path: process.env.output + "./dist/",
-    temp_path: process.env.output + "./temp/",
+    dest_path: process.env.output || "./dist/",
+    temp_path: "./temp/",
     fils_ext: "{js,css,html,png,jpg,gif,ico}",
     hash_value: md5Value()
 }
@@ -33,8 +32,13 @@ gulp.task("copy_htaccess", function() {
 })
 
 gulp.task("copy_other_files", function() {
-    return gulp.src([config.source_path + "**/*.*",
-            '!' + config.source_path + "**/*." + config.fils_ext
+    return gulp.src([
+            config.source_path + "**/*.*",
+            '!' + config.source_path + "node_modules/**/*.*",
+            '!' + config.source_path + "output/**/*.*",
+            '!' + config.source_path + "temp/**/*.*",
+            '!' + config.source_path + "**/*." + config.fils_ext,
+            
         ])
         .pipe(gulp.dest(config.dest_path))
 })
@@ -88,6 +92,9 @@ gulp.task('default', ["copy_other_files", "loginHtml", "mainjs", "copy_upload", 
             config.source_path + "**/*." + config.fils_ext,
             '!' + config.source_path + "*.html",
             '!' + config.source_advertiser_path + "*.html",
+            '!' + config.source_path + "node_modules/**/*.*",
+            '!' + config.source_path + "output/**/*.*",
+            '!' + config.source_path + "temp/**/*.*",
             //'!'+ config.source_path + "/Advertiser/sign-up.html"
         ])
         .pipe(rev({
