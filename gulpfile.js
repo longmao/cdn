@@ -3,6 +3,7 @@ var rev = require('gulp-rev-custom-hash');
 var revReplace = require('gulp-rev-replace'); //Rewrite occurences of filenames which have been renamed by gulp-rev 
 var replace = require('gulp-replace') //string replace
 
+console.log(process.env.output)
 var md5Value = function() {
     return Array.apply(0, Array(15)).map(function() {
         return (function(charset) {
@@ -12,11 +13,11 @@ var md5Value = function() {
 }
 
 var config = {
-    source_path: "./manage_90/",
-    source_advertiser_path: "./manage_90/Advertiser/",
+    source_path: process.env.output || "./manage_90/",
+    source_advertiser_path: process.env.output + "/Advertiser/"|| "./manage_90/Advertiser/",
     cdn_server: "http://cdn.yeahmobi.com/",
-    dest_path: "./dist/",
-    temp_path: "./temp/",
+    dest_path: process.env.output + "./dist/",
+    temp_path: process.env.output + "./temp/",
     fils_ext: "{js,css,html,png,jpg,gif,ico}",
     hash_value: md5Value()
 }
